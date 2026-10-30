@@ -91,7 +91,7 @@ export function LanggananAksi({ b, bulan, dilewati }: { b: Berulang; bulan: stri
 
   if (dilewati) {
     return (
-      <Button variant="ghost" loading={batalMut.isPending} onClick={() => batalMut.mutate()}>
+      <Button variant="ghost" kirim loading={batalMut.isPending} onClick={() => batalMut.mutate()}>
         Batalkan
       </Button>
     );

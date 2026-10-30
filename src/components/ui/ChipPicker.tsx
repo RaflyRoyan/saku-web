@@ -28,7 +28,7 @@ export function ChipPicker<T extends string>({ label, value, options, onChange, 
               aria-pressed={active}
               disabled={o.disabled}
               onClick={() => onChange(o.value)}
-              className={`min-h-10 shrink-0 rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors disabled:opacity-40 ${fokus} ${
+              className={`min-h-11 shrink-0 rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors disabled:opacity-40 ${fokus} ${
                 active ? "border-brand-700 bg-brand-50 text-brand-700" : "border-garis bg-white text-stone-700 hover:bg-brand-50"
               }`}
             >

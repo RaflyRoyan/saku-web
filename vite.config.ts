@@ -10,18 +10,24 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt": versi baru menunggu konfirmasi lewat banner, supaya isian form tidak hilang karena reload otomatis
+      registerType: "prompt",
       includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png"],
       manifest: {
+        id: "/",
         name: "Saku",
         short_name: "Saku",
         description: "Pencatatan keuangan pribadi",
         lang: "id",
         start_url: "/",
+        scope: "/",
         display: "standalone",
+        orientation: "portrait",
+        categories: ["finance"],
         background_color: "#fffaf5",
         theme_color: "#c2410c",
         icons: [
+          { src: "pwa-64x64.png", sizes: "64x64", type: "image/png" },
           { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
           { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
           { src: "maskable-icon-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },

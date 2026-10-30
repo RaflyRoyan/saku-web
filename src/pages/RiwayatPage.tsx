@@ -30,7 +30,7 @@ function FilterChip({ label, value, options, onChange, wajib }: FilterChipProps)
   const aktif = Boolean(value) && !wajib;
   return (
     <span
-      className={`relative flex min-h-10 shrink-0 items-center rounded-full border text-sm font-semibold ${
+      className={`relative flex min-h-11 shrink-0 items-center rounded-full border text-base font-semibold ${
         aktif ? "border-brand-700 bg-brand-50 text-brand-700" : "border-garis bg-white text-stone-700"
       }`}
     >
@@ -38,7 +38,7 @@ function FilterChip({ label, value, options, onChange, wajib }: FilterChipProps)
         aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`min-h-10 max-w-44 appearance-none truncate rounded-full bg-transparent pr-3 pl-4 ${aktif ? "pr-9" : ""} ${fokus}`}
+        className={`min-h-11 max-w-44 appearance-none truncate rounded-full bg-transparent pr-3 pl-4 ${aktif ? "pr-11" : ""} ${fokus}`}
       >
         {!wajib && <option value="">{label}</option>}
         {options.map((o) => (
@@ -52,7 +52,7 @@ function FilterChip({ label, value, options, onChange, wajib }: FilterChipProps)
           type="button"
           aria-label={`Hapus filter ${label}`}
           onClick={() => onChange("")}
-          className={`absolute right-1 flex size-8 items-center justify-center rounded-full hover:bg-brand-100 ${fokus}`}
+          className={`absolute right-0 flex size-11 items-center justify-center rounded-full hover:bg-brand-100 ${fokus}`}
         >
           <X className="size-4" aria-hidden />
         </button>

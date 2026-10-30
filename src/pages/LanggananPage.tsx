@@ -140,7 +140,7 @@ function LanggananCard({ b, onEdit }: { b: Berulang; onEdit: () => void }) {
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <span className="font-bold tabular-nums">{formatRupiah(b.nominal)}</span>
-          <button type="button" onClick={onEdit} aria-label={`Ubah ${b.nama}`} className={`flex size-9 items-center justify-center rounded-xl text-stone-400 hover:bg-brand-50 hover:text-brand-700 ${fokus}`}>
+          <button type="button" onClick={onEdit} aria-label={`Ubah ${b.nama}`} className={`flex size-11 items-center justify-center rounded-xl text-stone-400 hover:bg-brand-50 hover:text-brand-700 ${fokus}`}>
             <Pencil className="size-4" aria-hidden />
           </button>
         </div>

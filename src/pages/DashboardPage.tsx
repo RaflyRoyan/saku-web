@@ -145,9 +145,9 @@ export default function DashboardPage() {
                   to={`/akun/${a.akunId}`}
                   className={`flex w-32 shrink-0 flex-col gap-1 rounded-2xl border border-garis bg-white p-3 shadow-sm hover:bg-brand-50 ${fokus}`}
                 >
-                  <span className="flex items-center gap-1.5 truncate text-sm font-semibold text-stone-700">
+                  <span className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-stone-700">
                     <AkunIcon jenis={a.jenis} className="size-4 shrink-0 text-brand-600" />
-                    {a.nama}
+                    <span className="truncate">{a.nama}</span>
                   </span>
                   <span className={`font-bold tabular-nums ${a.saldoAkhir < 0 ? "text-keluar" : ""}`}>{formatRupiahRingkas(a.saldoAkhir)}</span>
                 </Link>

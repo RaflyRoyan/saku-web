@@ -252,7 +252,7 @@ export default function PeriodeBaruPage() {
           )}
           {bentrok.length === 0 && !err?.errors && <FormError error={mulai.error} />}
 
-          <Button block loading={mulai.isPending} onClick={() => mulai.mutate()}>
+          <Button block kirim loading={mulai.isPending} onClick={() => mulai.mutate()}>
             Mulai periode
           </Button>
           <Button variant="secondary" block onClick={() => ke("saldo")} disabled={mulai.isPending}>

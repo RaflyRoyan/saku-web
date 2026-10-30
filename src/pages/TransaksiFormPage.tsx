@@ -245,7 +245,7 @@ function TransaksiForm({ edit }: { edit?: Transaksi }) {
                       type="button"
                       aria-pressed={form.biayaAdmin === b}
                       onClick={() => set("biayaAdmin", b)}
-                      className={`min-h-9 rounded-full border px-3 text-sm font-semibold ${fokus} ${
+                      className={`min-h-11 rounded-full border px-4 text-sm font-semibold ${fokus} ${
                         form.biayaAdmin === b ? "border-brand-700 bg-brand-50 text-brand-700" : "border-garis bg-white text-stone-700"
                       }`}
                     >
@@ -300,7 +300,7 @@ function TransaksiForm({ edit }: { edit?: Transaksi }) {
           Simpan
         </Button>
         {!edit && (
-          <Button variant="secondary" block loading={simpan.isPending && simpan.variables} onClick={() => simpan.mutate(true)}>
+          <Button variant="secondary" block kirim loading={simpan.isPending && simpan.variables} onClick={() => simpan.mutate(true)}>
             Simpan & catat lagi
           </Button>
         )}

@@ -18,11 +18,13 @@ import PenggunaPage from "./pages/PenggunaPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import RequireAuth from "./components/RequireAuth";
 import SessionWatcher from "./components/SessionWatcher";
+import StatusBanner from "./components/StatusBanner";
 
 export default function App() {
   return (
     <>
       <SessionWatcher />
+      <StatusBanner />
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/setup" element={<SetupPage />} />

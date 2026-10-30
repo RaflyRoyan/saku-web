@@ -23,6 +23,7 @@ React SPA (PWA) ──fetch /api/* + cookie──▶ Netlify Function (Hono) ─
 - npx vitest run -t "nama test"         → satu test berdasarkan nama
 - npm run lint           → oxlint
 - npm run template       → generate ulang `template/Saku_Template.xlsx` dari `server/sheets/schema.ts`
+- npm run ikon           → generate ulang ikon PWA & favicon dari `public/logo.svg` (`scripts/buat_ikon.ts`)
 - npm run build          → `tsc -b` (3 tsconfig) + vite build; wajib lulus sebelum commit
 
 Lingkungan: Windows, Node v22 (jangan minta upgrade Node global). netlify-cli dipasang lokal, jalankan via `npx`.
@@ -38,7 +39,7 @@ Lingkungan: Windows, Node v22 (jangan minta upgrade Node global). netlify-cli di
 - **Error**: ProblemDetails (`title` Bahasa Indonesia, `errors` per field camelCase) dari `server/common/errors.ts`. Frontend `src/lib/api.ts` mengubahnya jadi `ApiError`.
 - **Auth**: JWT HS256 di cookie `saku_token` (HttpOnly). Handler terproteksi memanggil `loadSession(c, [sheet…])` (`server/auth/session.ts`) yang membaca `Pengguna` + sheet lain dalam satu batchGet dan mengecek `aktif`/`versi_token`. 401 di frontend → `src/lib/session.ts` → kembali ke /login (kecuali query/mutation ber-`meta.ignore401`). POST/PUT/DELETE wajib header `X-Requested-With: saku` (sudah dikirim `src/lib/api.ts`), kalau tidak 403.
 - **Frontend** (`src/`): React Router (route di `App.tsx`), TanStack Query, Tailwind v4 tema Sunrise (token di `index.css`, spec di 02 §4). Satu file per halaman di `src/pages/`.
-- **PWA**: `vite-plugin-pwa` di `vite.config.ts`; `/api/*` dikecualikan dari cache service worker.
+- **PWA**: `vite-plugin-pwa` di `vite.config.ts` (`registerType: "prompt"`); `/api/*` dikecualikan dari cache service worker. `components/StatusBanner.tsx` menampilkan banner offline & "Versi baru tersedia". `Button` dengan `type="submit"` atau prop `kirim` otomatis nonaktif saat offline.
 
 ## Test
 - Vitest, environment node, hanya `tests/**/*.test.ts`.

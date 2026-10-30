@@ -1,13 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="langit" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="langit" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="512" y2="512">
       <stop offset="0" stop-color="#7e22ce"/>
       <stop offset="0.55" stop-color="#be123c"/>
       <stop offset="1" stop-color="#ea580c"/>
     </linearGradient>
+    <clipPath id="atas-cakrawala">
+      <rect width="512" height="300"/>
+    </clipPath>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#langit)"/>
-  <circle cx="256" cy="300" r="96" fill="#fff7ed"/>
-  <rect x="96" y="300" width="320" height="120" fill="url(#langit)"/>
-  <rect x="96" y="296" width="320" height="16" rx="8" fill="#fff7ed"/>
+  <!-- Matahari terbit di atas cakrawala -->
+  <circle cx="256" cy="300" r="100" fill="#fff7ed" clip-path="url(#atas-cakrawala)"/>
+  <rect x="96" y="292" width="320" height="16" rx="8" fill="#fff7ed"/>
+  <rect x="160" y="340" width="192" height="14" rx="7" fill="#fff7ed" opacity="0.55"/>
+  <rect x="208" y="378" width="96" height="14" rx="7" fill="#fff7ed" opacity="0.3"/>
 </svg>

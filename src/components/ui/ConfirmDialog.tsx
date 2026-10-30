@@ -22,7 +22,7 @@ export function ConfirmDialog({ open, title, children, confirmLabel, danger, loa
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             Batal
           </Button>
-          <Button variant={danger ? "dangerSolid" : "primary"} onClick={onConfirm} loading={loading}>
+          <Button variant={danger ? "dangerSolid" : "primary"} kirim onClick={onConfirm} loading={loading}>
             {confirmLabel}
           </Button>
         </div>

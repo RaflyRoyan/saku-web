@@ -19,7 +19,7 @@ export function SegmentedControl<T extends string>({ label, value, options, onCh
             role="tab"
             aria-selected={active}
             onClick={() => onChange(o.value)}
-            className={`min-h-10 flex-1 rounded-lg px-3 text-sm font-semibold transition-colors ${fokus} ${
+            className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold transition-colors ${fokus} ${
               active ? "bg-white text-brand-700 shadow-sm" : "text-stone-500 hover:text-stone-700"
             }`}
           >

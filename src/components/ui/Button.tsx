@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 import { LoaderCircle } from "lucide-react";
+import { useOnline } from "../../hooks/useOnline";
 
 export const fokus =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2";
@@ -16,14 +17,19 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: keyof typeof VARIANT;
   loading?: boolean;
   block?: boolean;
+  /** Tombol yang mengirim ke server: dinonaktifkan saat offline. Default true untuk `type="submit"`. */
+  kirim?: boolean;
 }
 
-export function Button({ variant = "primary", loading, block, disabled, className = "", children, ...rest }: ButtonProps) {
+export function Button({ variant = "primary", loading, block, kirim, disabled, className = "", children, ...rest }: ButtonProps) {
+  const online = useOnline();
+  const offline = (kirim ?? rest.type === "submit") && !online;
   return (
     <button
       type="button"
       {...rest}
-      disabled={disabled || loading}
+      disabled={disabled || loading || offline}
+      title={offline ? "Tidak ada koneksi" : rest.title}
       aria-busy={loading || undefined}
       className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed ${fokus} ${VARIANT[variant]} ${block ? "w-full" : ""} ${className}`}
     >

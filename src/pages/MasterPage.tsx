@@ -12,6 +12,7 @@ import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { EmptyState, ErrorState, ListSkeleton } from "../components/ui/States";
 import { useMe } from "../hooks/useAuth";
 import { masterKeys, useAkun, useKategori, type Akun, type JenisAkun, type Kategori, type TipeKategori } from "../hooks/useMaster";
+import { invalidateKeuangan } from "../hooks/useTransaksi";
 import { useToast } from "../hooks/useToast";
 import { ApiError, send } from "../lib/api";
 import { formatRupiah } from "../lib/format";
@@ -79,13 +80,13 @@ function AkunRow({ akun, isAdmin, onEdit, move }: {
         <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3">{body}</div>
       )}
       {move && (
-        <div className="flex flex-col pr-2">
+        <div className="flex pr-1">
           <button
             type="button"
             onClick={move.up}
             disabled={!move.up || move.pending}
             aria-label={`Naikkan ${akun.nama}`}
-            className={`flex h-7 w-11 items-center justify-center rounded-lg text-stone-500 hover:bg-brand-50 disabled:opacity-30 ${fokus}`}
+            className={`flex size-11 items-center justify-center rounded-lg text-stone-500 hover:bg-brand-50 disabled:opacity-30 ${fokus}`}
           >
             <ChevronUp className="size-4" aria-hidden />
           </button>
@@ -94,7 +95,7 @@ function AkunRow({ akun, isAdmin, onEdit, move }: {
             onClick={move.down}
             disabled={!move.down || move.pending}
             aria-label={`Turunkan ${akun.nama}`}
-            className={`flex h-7 w-11 items-center justify-center rounded-lg text-stone-500 hover:bg-brand-50 disabled:opacity-30 ${fokus}`}
+            className={`flex size-11 items-center justify-center rounded-lg text-stone-500 hover:bg-brand-50 disabled:opacity-30 ${fokus}`}
           >
             <ChevronDown className="size-4" aria-hidden />
           </button>
@@ -117,7 +118,7 @@ function AkunForm({ akun, nextUrutan, onDone }: { akun: Akun | null; nextUrutan:
       return send("PUT", `/akun/${akun.id}`, { nama: form.nama, jenis: form.jenis, urutan: akun.urutan });
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: masterKeys.akun });
+      invalidateKeuangan(qc); // nama/urutan akun tampil di ringkasan, riwayat, langganan
       toast.show(akun ? "Akun disimpan" : "Akun ditambahkan");
       onDone();
     },
@@ -155,7 +156,7 @@ function AkunTab({ isAdmin }: { isAdmin: boolean }) {
 
   const urutkan = useMutation({
     mutationFn: (ids: string[]) => send("PUT", "/akun/urutan", { ids }),
-    onSettled: () => qc.invalidateQueries({ queryKey: masterKeys.akun }),
+    onSettled: () => invalidateKeuangan(qc),
     onError: (e) => toast.show(e instanceof ApiError ? e.title : "Gagal mengubah urutan.", "error"),
   });
 
@@ -247,6 +248,7 @@ function KategoriForm({ kategori, tipe, onDone }: { kategori: Kategori | null; t
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: masterKeys.kategori });
+      invalidateKeuangan(qc);
       toast.show(kategori ? "Kategori disimpan" : "Kategori ditambahkan");
       onDone();
     },

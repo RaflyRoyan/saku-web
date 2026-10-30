@@ -118,7 +118,7 @@ function RiwayatItem({ r, onHapus }: { r: RiwayatTabungan; onHapus: () => void }
         {formatAngka(Math.abs(r.nominal))}
       </span>
       {r.bisaHapus && (
-        <button type="button" onClick={onHapus} aria-label={`Hapus tarik ${r.keterangan}`} className={`flex size-10 shrink-0 items-center justify-center rounded-xl text-stone-400 hover:bg-rose-50 hover:text-keluar ${fokus}`}>
+        <button type="button" onClick={onHapus} aria-label={`Hapus tarik ${r.keterangan}`} className={`flex size-11 shrink-0 items-center justify-center rounded-xl text-stone-400 hover:bg-rose-50 hover:text-keluar ${fokus}`}>
           <Trash2 className="size-4" aria-hidden />
         </button>
       )}

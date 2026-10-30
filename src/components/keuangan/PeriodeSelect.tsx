@@ -11,7 +11,7 @@ export function PeriodeSelect({ value, onChange }: { value: string | undefined; 
       aria-label="Periode"
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value)}
-      className={`min-h-10 max-w-48 truncate rounded-xl border border-garis bg-white px-2 text-sm font-semibold ${fokus}`}
+      className={`min-h-11 max-w-48 truncate rounded-xl border border-garis bg-white px-2 text-base font-semibold ${fokus}`}
     >
       {list.data.map((p) => (
         <option key={p.id} value={p.id}>
