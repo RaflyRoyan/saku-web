@@ -5,6 +5,7 @@ import PageHeader from "../components/layout/PageHeader";
 import { BottomSheet } from "../components/ui/BottomSheet";
 import { Button, fokus } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
+import { FormError } from "../components/ui/FormError";
 import { Input, PasswordInput, Select, Switch } from "../components/ui/Input";
 import { EmptyState, ErrorState, ListSkeleton } from "../components/ui/States";
 import { useMe, type Pengguna } from "../hooks/useAuth";
@@ -21,17 +22,6 @@ const PERAN = [
 function Badge({ children, tone }: { children: React.ReactNode; tone: "brand" | "stone" }) {
   const cls = tone === "brand" ? "bg-brand-50 text-brand-700" : "bg-stone-100 text-stone-500";
   return <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${cls}`}>{children}</span>;
-}
-
-function FormError({ error }: { error: unknown }) {
-  if (!error) return null;
-  const err = error instanceof ApiError ? error : null;
-  if (err?.errors) return null; // sudah tampil per field
-  return (
-    <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-medium text-keluar">
-      {err?.title ?? "Tidak bisa terhubung ke server."}
-    </p>
-  );
 }
 
 function TambahForm({ onDone }: { onDone: () => void }) {

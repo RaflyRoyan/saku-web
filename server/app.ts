@@ -5,8 +5,10 @@ import type { Claims } from "./auth/token";
 import { systemClock, type Clock } from "./common/clock";
 import { problem, problemFromError } from "./common/errors";
 import { getConfig, getStore } from "./config";
+import { akun } from "./routes/akun";
 import { auth } from "./routes/auth";
 import { health } from "./routes/health";
+import { kategori } from "./routes/kategori";
 import { pengguna } from "./routes/pengguna";
 import type { SheetStore } from "./sheets/store";
 
@@ -50,6 +52,8 @@ export function createApp(deps: Partial<AppDeps> = {}) {
   app.route("/health", health);
   app.route("/auth", auth);
   app.route("/pengguna", pengguna);
+  app.route("/akun", akun);
+  app.route("/kategori", kategori);
 
   app.notFound((c) => problem(c, 404, "Endpoint tidak ditemukan."));
   app.onError((err, c) => problemFromError(c, err));
