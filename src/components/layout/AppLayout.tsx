@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import {
+  CalendarRange,
   CreditCard,
   History,
   House,
@@ -32,6 +33,7 @@ const sidebarNav: NavItem[] = [
   { to: "/riwayat", label: "Riwayat", icon: History },
   { to: "/langganan", label: "Langganan", icon: Repeat },
   { to: "/tabungan", label: "Tabungan", icon: PiggyBank },
+  { to: "/periode", label: "Periode", icon: CalendarRange },
   { to: "/master", label: "Master", icon: Tags },
 ];
 

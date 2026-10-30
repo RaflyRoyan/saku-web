@@ -246,3 +246,26 @@ describe("ubah periode & saldo awal", () => {
     expect(r.setorTabungan).toHaveLength(3);
   });
 });
+
+describe("filter riwayat lintas periode", () => {
+  it("periodeId=semua + dari/sampai mencakup periode tertutup; tetap hanya milik sendiri", async () => {
+    const { budi, admin, akun, makan, clock } = await siapkan();
+    await budi.post("/periode/mulai", { tanggalMulai: "2026-10-01" });
+    clock.set("2026-10-20T03:00:00Z");
+    for (const tanggal of ["2026-10-05", "2026-10-12"]) {
+      await budi.post("/transaksi", { tipe: "keluar", akunId: akun.BCA, kategoriId: makan, nominal: 1_000, tanggal });
+    }
+    await budi.post("/periode/mulai", { tanggalMulai: "2026-10-15" });
+    await budi.post("/transaksi", { tipe: "keluar", akunId: akun.BCA, kategoriId: makan, nominal: 1_000, tanggal: "2026-10-18" });
+
+    expect((await budi.get("/transaksi")).body.total).toBe(1);
+    const semua = (await budi.get("/transaksi?periodeId=semua")).body;
+    expect(semua.data.map((t: { tanggal: string }) => t.tanggal)).toEqual(["2026-10-18", "2026-10-12", "2026-10-05"]);
+    const rentang = (await budi.get("/transaksi?periodeId=semua&dari=2026-10-10&sampai=2026-10-18")).body;
+    expect(rentang.total).toBe(2);
+
+    await admin.post("/periode/mulai", { tanggalMulai: "2026-10-01" });
+    await admin.post("/transaksi", { tipe: "keluar", akunId: akun.BCA, kategoriId: makan, nominal: 1, tanggal: "2026-10-06" });
+    expect((await budi.get("/transaksi?periodeId=semua")).body.total).toBe(3);
+  });
+});

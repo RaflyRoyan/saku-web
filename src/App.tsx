@@ -9,6 +9,7 @@ import AkunPage from "./pages/AkunPage";
 import AkunDetailPage from "./pages/AkunDetailPage";
 import RiwayatPage from "./pages/RiwayatPage";
 import PeriodeBaruPage from "./pages/PeriodeBaruPage";
+import PeriodePage from "./pages/PeriodePage";
 import LanggananPage from "./pages/LanggananPage";
 import TabunganPage from "./pages/TabunganPage";
 import MasterPage from "./pages/MasterPage";
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/akun" element={<AkunPage />} />
             <Route path="/akun/:id" element={<AkunDetailPage />} />
             <Route path="/riwayat" element={<RiwayatPage />} />
+            <Route path="/periode" element={<PeriodePage />} />
             <Route path="/periode/baru" element={<PeriodeBaruPage />} />
             <Route path="/langganan" element={<LanggananPage />} />
             <Route path="/tabungan" element={<TabunganPage />} />

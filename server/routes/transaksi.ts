@@ -42,8 +42,10 @@ transaksi.get("/", async (c) => {
 
   const halaman = Math.max(1, Math.floor(Number(q.halaman) || 1));
   const ukuran = Math.min(200, Math.max(1, Math.floor(Number(q.ukuran) || 50)));
-  const periodeId = q.periodeId ? findOwned(s.periode, q.periodeId, uid).data.id : periodeAktif(s.periode, uid)?.data.id;
-  if (!periodeId) return c.json({ data: [], total: 0, halaman, ukuran });
+  // periodeId=semua → tanpa filter periode (biasanya dipadukan dengan dari/sampai)
+  const semua = q.periodeId === "semua";
+  const periodeId = semua ? null : q.periodeId ? findOwned(s.periode, q.periodeId, uid).data.id : periodeAktif(s.periode, uid)?.data.id;
+  if (!semua && !periodeId) return c.json({ data: [], total: 0, halaman, ukuran });
 
   const biayaAdminId = s.kategori.find((k) => k.data.kode_sistem === "BIAYA_ADMIN")?.data.id;
   const cari = q.q?.trim().toLowerCase();
@@ -52,7 +54,7 @@ transaksi.get("/", async (c) => {
     .filter(
       (t) =>
         t.user_id === uid &&
-        t.periode_id === periodeId &&
+        (semua || t.periode_id === periodeId) &&
         // Filter akun juga mencakup transfer dengan akun ini sebagai tujuan
         (!q.akunId || t.akun_id === q.akunId || t.akun_tujuan_id === q.akunId) &&
         (!q.tipe || t.tipe === q.tipe) &&
