@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { GoogleSheetStore } from "./sheets/google-store";
+import { MemorySheetStore } from "./sheets/memory-store";
+import type { SheetStore } from "./sheets/store";
 
 const envSchema = z
   .object({
@@ -32,7 +35,7 @@ const envSchema = z
   .transform((env) => ({
     ...env,
     // Private key dari env biasanya berisi "\n" literal
-    GOOGLE_PRIVATE_KEY: env.GOOGLE_PRIVATE_KEY?.replace(/\n/g, "\n"),
+    GOOGLE_PRIVATE_KEY: env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
   }));
 
 export type AppConfig = z.infer<typeof envSchema>;
@@ -53,4 +56,22 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
 export function getConfig(): AppConfig {
   cached ??= loadConfig();
   return cached;
+}
+
+export function createStore(config: AppConfig): SheetStore {
+  if (config.SHEETS_MODE === "memory") return new MemorySheetStore();
+  // superRefine sudah memastikan ketiganya terisi saat SHEETS_MODE=google
+  return new GoogleSheetStore({
+    spreadsheetId: config.SPREADSHEET_ID!,
+    clientEmail: config.GOOGLE_CLIENT_EMAIL!,
+    privateKey: config.GOOGLE_PRIVATE_KEY!,
+  });
+}
+
+let store: SheetStore | undefined;
+
+/** Satu store per instance function. Mode memory: data hilang saat instance mati. */
+export function getStore(): SheetStore {
+  store ??= createStore(getConfig());
+  return store;
 }

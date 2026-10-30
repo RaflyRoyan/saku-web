@@ -41,6 +41,10 @@ Aksi yang paling sering: **catat pengeluaran** (harus bisa selesai < 10 detik di
 | §11 | Tanpa rate limit per IP, tanpa Swagger |
 | §12 Deploy | Netlify (sudah di dokumen 01) |
 | §13 Test | Vitest + `memory-store` + clock palsu. Test endpoint dengan `app.request()` |
+| §5.1 butir 3, §5.2 `Akun`/`Kategori`/`KategoriDefault` | **Akun dan Kategori adalah master bersama** untuk semua pengguna: kolom `user_id` dihapus dari kedua sheet, sheet `KategoriDefault` dihapus. Kategori awal (termasuk 2 kategori sistem) langsung ada di sheet `Kategori` template. Sheet lain (`Periode`, `SaldoAwal`, `Transaksi`, `Berulang`, `BerulangLewati`, `Tabungan`) tetap per pengguna lewat `user_id` |
+| §6.3 Peran, §10.3, §10.4 | `GET` akun & kategori boleh semua pengguna. `POST`/`PUT` akun & kategori **hanya admin** (bukan admin → 403). `saldo` di `GET /api/akun` dihitung dari data pengguna yang login saja |
+| §7.1 Nonaktifkan akun | Ditolak kalau saldo akun ≠ 0 di periode aktif **milik pengguna mana pun** → 409 `"Saldo akun masih Rp X. Pindahkan dulu sebelum dinonaktifkan."` (X = saldo milik admin sendiri; kalau saldo admin 0 tapi ada pengguna lain yang belum 0, pesan: `"Akun masih dipakai pengguna lain dengan saldo ≠ 0."`) |
+| §6.1 Setup, §10.2 tambah pengguna | Tidak ada penyalinan kategori. Setup awal cukup memastikan 2 kategori sistem (`BIAYA_ADMIN`, `TARIK_TABUNGAN`) ada di `Kategori`; kalau belum ada, buat |
 
 ---
 
@@ -65,7 +69,7 @@ Satu milestone = satu merge ke `main` = satu production deploy.
 
 **Backend**
 - [ ] Hash PBKDF2, JWT cookie, middleware auth (cek `aktif` + `versi_token`), middleware CSRF
-- [ ] `GET /auth/status`, `POST /auth/setup` (salin KategoriDefault + 2 kategori sistem), `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `PUT /auth/password`, `PUT /auth/profil`
+- [ ] `GET /auth/status`, `POST /auth/setup` (pastikan 2 kategori sistem ada di `Kategori`), `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `PUT /auth/password`, `PUT /auth/profil`
 - [ ] Lockout di sheet
 - [ ] Endpoint admin `/pengguna` (spec §10.2), aturan "minimal 1 admin aktif"
 
@@ -516,6 +520,7 @@ Langkah 1 · Tutup periode          Langkah 2 · Saldo awal          Langkah 3 �
 
 ### 6.10 Master (`/master`)
 
+- Master dipakai bersama semua pengguna. **Admin** bisa tambah/ubah/nonaktifkan; pengguna biasa hanya melihat (tombol tambah, ubah, dan urutan disembunyikan).
 - SegmentedControl **Akun | Kategori**.
 - **Akun:** list dengan ikon jenis, nama, saldo periode aktif. Tombol "+ Tambah akun". Tap → BottomSheet ubah (nama, jenis, aktif). Urutan bisa diatur (tombol ▲▼, drag-and-drop tidak wajib). Error 409 saldo ≠ 0 saat menonaktifkan ditampilkan apa adanya.
 - **Kategori:** sub-tab Keluar / Masuk. Kategori sistem diberi badge "Sistem" dan tidak bisa dinonaktifkan. Item nonaktif dikelompokkan di bawah dalam bagian yang bisa dibuka.
