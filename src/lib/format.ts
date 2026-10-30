@@ -103,3 +103,14 @@ export function formatPeriode(p: { nama: string; tanggalMulai: string; tanggalSe
   const akhir = p.tanggalSelesai ? formatTanggal(p.tanggalSelesai) : "sekarang";
   return `${p.nama} · ${formatTanggal(p.tanggalMulai)} – ${akhir}`;
 }
+
+/** `yyyy-MM` → `Nov` / `November 2026` (`panjang`). Tahun hanya kalau beda tahun (versi pendek). */
+export function formatBulan(bulan: string, panjang = false, now = new Date()): string {
+  const d = new Date(`${bulan}-15T00:00:00+07:00`);
+  const sameYear = tahunWib(d) === tahunWib(now);
+  return new Intl.DateTimeFormat("id-ID", {
+    month: panjang ? "long" : "short",
+    year: panjang || !sameYear ? "numeric" : undefined,
+    timeZone: WIB,
+  }).format(d);
+}

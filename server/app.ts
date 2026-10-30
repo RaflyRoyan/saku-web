@@ -7,6 +7,8 @@ import { problem, problemFromError } from "./common/errors";
 import { getConfig, getStore } from "./config";
 import { akun } from "./routes/akun";
 import { auth } from "./routes/auth";
+import { berulang } from "./routes/berulang";
+import { dashboard } from "./routes/dashboard";
 import { health } from "./routes/health";
 import { kategori } from "./routes/kategori";
 import { pengguna } from "./routes/pengguna";
@@ -60,6 +62,8 @@ export function createApp(deps: Partial<AppDeps> = {}) {
   app.route("/periode", periode);
   app.route("/transaksi", transaksi);
   app.route("/tabungan", tabungan);
+  app.route("/berulang", berulang);
+  app.route("/dashboard", dashboard);
 
   app.notFound((c) => problem(c, 404, "Endpoint tidak ditemukan."));
   app.onError((err, c) => problemFromError(c, err));
