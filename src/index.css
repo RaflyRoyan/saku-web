@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand: oranye matahari terbit */
+  --color-brand-50:  #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-200: #fed7aa;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c; /* ikon & aksen saja, jangan untuk teks kecil */
+  --color-brand-700: #c2410c; /* tombol utama, nav aktif, teks brand */
+  --color-brand-800: #9a3412;
+
+  /* Langit fajar: gradasi kartu utama */
+  --color-fajar-ungu:   #7e22ce;
+  --color-fajar-merah:  #be123c;
+  --color-fajar-oranye: #ea580c;
+
+  /* Netral hangat */
+  --color-latar:      #fffaf5; /* background halaman (krem) */
+  --color-latar-glow: #ffedd5; /* cahaya tipis di atas halaman */
+  --color-garis:      #f3e3d3; /* border kartu & divider */
+
+  /* Warna bermakna (teks/ikon di atas putih/krem, kontras ≥ 4.5:1) */
+  --color-masuk:    #047857; /* hijau */
+  --color-keluar:   #be123c; /* merah mawar */
+  --color-transfer: #6d28d9; /* ungu fajar */
+  --color-tabungan: #a16207; /* emas matahari */
+}
+
+html, body, #root { height: 100%; }
+body {
+  @apply bg-latar text-stone-900 antialiased;
+  background-image: linear-gradient(to bottom, var(--color-latar-glow), transparent 240px);
+  background-repeat: no-repeat;
+}
+
+/* Kartu utama (saldo) */
+.bg-sunrise {
+  background-image: linear-gradient(135deg, var(--color-fajar-ungu), var(--color-fajar-merah) 55%, var(--color-fajar-oranye));
+}
