@@ -10,6 +10,8 @@ import { auth } from "./routes/auth";
 import { health } from "./routes/health";
 import { kategori } from "./routes/kategori";
 import { pengguna } from "./routes/pengguna";
+import { periode } from "./routes/periode";
+import { transaksi } from "./routes/transaksi";
 import type { SheetStore } from "./sheets/store";
 
 export interface Settings {
@@ -54,6 +56,8 @@ export function createApp(deps: Partial<AppDeps> = {}) {
   app.route("/pengguna", pengguna);
   app.route("/akun", akun);
   app.route("/kategori", kategori);
+  app.route("/periode", periode);
+  app.route("/transaksi", transaksi);
 
   app.notFound((c) => problem(c, 404, "Endpoint tidak ditemukan."));
   app.onError((err, c) => problemFromError(c, err));

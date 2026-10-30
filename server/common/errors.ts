@@ -9,13 +9,16 @@ export class AppError extends Error {
   status: ContentfulStatusCode;
   title: string;
   errors?: FieldErrors;
+  /** Field tambahan di body ProblemDetails, mis. daftar transaksi yang bentrok. */
+  extra?: Record<string, unknown>;
 
-  constructor(status: ContentfulStatusCode, title: string, errors?: FieldErrors) {
+  constructor(status: ContentfulStatusCode, title: string, errors?: FieldErrors, extra?: Record<string, unknown>) {
     super(title);
     this.name = "AppError";
     this.status = status;
     this.title = title;
     this.errors = errors;
+    this.extra = extra;
   }
 }
 
@@ -42,7 +45,7 @@ export function problem(
 
 export function problemFromError(c: Context, err: unknown) {
   if (err instanceof AppError) {
-    return problem(c, err.status, err.title, err.errors ? { errors: err.errors } : undefined);
+    return problem(c, err.status, err.title, { ...err.extra, ...(err.errors ? { errors: err.errors } : {}) });
   }
   if (err instanceof HTTPException) {
     // Mis. body JSON rusak dari validator Hono

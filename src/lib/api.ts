@@ -3,12 +3,15 @@ export class ApiError extends Error {
   status: number;
   title: string;
   errors?: Record<string, string[]>;
+  /** Field lain di body ProblemDetails, mis. `transaksi` saat mulai periode bentrok. */
+  extra: Record<string, unknown>;
 
-  constructor(status: number, title: string, errors?: Record<string, string[]>) {
+  constructor(status: number, title: string, errors?: Record<string, string[]>, extra: Record<string, unknown> = {}) {
     super(title);
     this.status = status;
     this.title = title;
     this.errors = errors;
+    this.extra = extra;
   }
 }
 
@@ -24,7 +27,10 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
   if (res.status === 204) return undefined as T;
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(res.status, body.title ?? "Terjadi kesalahan.", body.errors);
+  if (!res.ok) {
+    const { title, errors, ...extra } = body;
+    throw new ApiError(res.status, title ?? "Terjadi kesalahan.", errors, extra);
+  }
   return body as T;
 }
 

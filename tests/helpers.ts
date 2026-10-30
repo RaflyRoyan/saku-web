@@ -37,6 +37,7 @@ export function setupTest(start = "2026-10-30T03:00:00Z") {
       get: (path: string) => request("GET", path),
       post: (path: string, body?: unknown, opts?: { csrf?: boolean }) => request("POST", path, body ?? {}, opts),
       put: (path: string, body?: unknown) => request("PUT", path, body ?? {}),
+      del: (path: string) => request("DELETE", path),
       get cookie() {
         return cookie;
       },
