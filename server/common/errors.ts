@@ -1,4 +1,5 @@
 import type { Context } from "hono";
+import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 export type FieldErrors = Record<string, string[]>;
@@ -42,6 +43,11 @@ export function problem(
 export function problemFromError(c: Context, err: unknown) {
   if (err instanceof AppError) {
     return problem(c, err.status, err.title, err.errors ? { errors: err.errors } : undefined);
+  }
+  if (err instanceof HTTPException) {
+    // Mis. body JSON rusak dari validator Hono
+    const title = err.status === 400 ? "Format data tidak valid." : "Permintaan tidak dapat diproses.";
+    return problem(c, err.status as ContentfulStatusCode, title);
   }
   console.error("Error tak tertangani:", err instanceof Error ? err.message : err);
   return problem(c, 500, "Terjadi kesalahan pada server.");

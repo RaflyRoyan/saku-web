@@ -29,14 +29,14 @@ Lingkungan: Windows, Node v22 (jangan minta upgrade Node global). netlify-cli di
 
 ## Arsitektur
 - **Entry API**: `netlify/functions/api.ts` meneruskan semua `/api/*` ke Hono app di `server/app.ts` (`basePath("/api")`). Route baru didaftarkan di app ini.
-- **Lapisan backend** (`server/`): `routes/` → `services/` (aturan bisnis) → `repositories/` → `sheets/store.ts` (interface `SheetStore`). Implementasi: `memory-store.ts` (test & lokal) dan `google-store.ts`, dipilih oleh `SHEETS_MODE` di `server/config.ts`.
+- **Lapisan backend** (`server/`): `routes/` → `services/` (aturan bisnis) → `repositories/` → `sheets/store.ts` (interface `SheetStore`). Implementasi: `memory-store.ts` (`MemorySheetStore` untuk test; `FileSheetStore` → `.netlify/saku-memory.json` untuk `SHEETS_MODE=memory` di `netlify dev`, karena tiap request bisa jalan di instance baru) dan `google-store.ts`, dipilih oleh `SHEETS_MODE` di `server/config.ts`.
 - **Sheets**: baca/tulis berdasarkan **urutan kolom** di `sheets/schema.ts`, bukan nama header. Nilai dibaca lewat parser toleran `sheets/parse.ts`. Tidak ada cache lintas request: tiap handler 1 `values:batchGet` untuk semua sheet yang dibutuhkan (termasuk `Pengguna` untuk validasi token). Sebelum update/hapus, cari nomor baris dari `id` pada bacaan terbaru.
 - **Batas waktu** function ±10 detik: operasi besar (tutup periode) digabung ke `values:batchUpdate` / append multi-baris, dan harus idempoten.
 - **Master bersama**: `Akun` & `Kategori` dipakai semua pengguna (tanpa `user_id`), hanya admin yang boleh menulis. Tidak ada sheet `KategoriDefault` (02 §2).
 - **Isolasi data**: sheet lain kecuali `Pengguna` difilter `user_id`; ID milik user lain → 404. Kolom audit diisi dari JWT, tidak pernah dari body.
 - **Waktu**: server UTC, semua tanggal dihitung WIB lewat `server/common/clock.ts` (bisa di-mock di test).
 - **Error**: ProblemDetails (`title` Bahasa Indonesia, `errors` per field camelCase) dari `server/common/errors.ts`. Frontend `src/lib/api.ts` mengubahnya jadi `ApiError`.
-- **Auth**: JWT HS256 di cookie `saku_token` (HttpOnly). POST/PUT/DELETE wajib header `X-Requested-With: saku` (sudah dikirim `src/lib/api.ts`), kalau tidak 403.
+- **Auth**: JWT HS256 di cookie `saku_token` (HttpOnly). Handler terproteksi memanggil `loadSession(c, [sheet…])` (`server/auth/session.ts`) yang membaca `Pengguna` + sheet lain dalam satu batchGet dan mengecek `aktif`/`versi_token`. 401 di frontend → `src/lib/session.ts` → kembali ke /login (kecuali query/mutation ber-`meta.ignore401`). POST/PUT/DELETE wajib header `X-Requested-With: saku` (sudah dikirim `src/lib/api.ts`), kalau tidak 403.
 - **Frontend** (`src/`): React Router (route di `App.tsx`), TanStack Query, Tailwind v4 tema Sunrise (token di `index.css`, spec di 02 §4). Satu file per halaman di `src/pages/`.
 - **PWA**: `vite-plugin-pwa` di `vite.config.ts`; `/api/*` dikecualikan dari cache service worker.
 

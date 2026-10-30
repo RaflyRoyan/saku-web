@@ -27,3 +27,8 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!res.ok) throw new ApiError(res.status, body.title ?? "Terjadi kesalahan.", body.errors);
   return body as T;
 }
+
+/** POST/PUT/DELETE dengan body JSON. */
+export function send<T>(method: "POST" | "PUT" | "DELETE", path: string, body?: unknown): Promise<T> {
+  return api<T>(path, { method, body: body === undefined ? undefined : JSON.stringify(body) });
+}

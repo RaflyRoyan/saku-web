@@ -1,3 +1,5 @@
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { headerOf, SHEET_NAMES, type SheetName } from "./schema";
 import { SheetMissingError, type CellValue, type RowUpdate, type SheetData, type SheetStore } from "./store";
 
@@ -52,6 +54,11 @@ export class MemorySheetStore implements SheetStore {
     this.grid(sheet).splice(row - 1, 1);
   }
 
+  /** Salinan semua sheet (untuk FileSheetStore). */
+  dump(): Partial<Record<SheetName, Grid>> {
+    return Object.fromEntries([...this.grids].map(([k, g]) => [k, g.map((r) => [...r])]));
+  }
+
   private grid(sheet: SheetName): Grid {
     const grid = this.grids.get(sheet);
     if (!grid) throw new SheetMissingError([sheet]);
@@ -67,5 +74,52 @@ export class MemorySheetStore implements SheetStore {
     if (!Number.isInteger(row) || row < 2 || row > this.grid(sheet).length) {
       throw new Error(`Baris ${row} tidak ada di sheet ${sheet}.`);
     }
+  }
+}
+
+/**
+ * Memory store yang disimpan ke file JSON, untuk `SHEETS_MODE=memory` di `netlify dev`
+ * (setiap request bisa jalan di instance baru, jadi isi memori biasa hilang).
+ */
+export class FileSheetStore implements SheetStore {
+  private file: string;
+
+  constructor(file: string) {
+    this.file = file;
+  }
+
+  private load(): MemorySheetStore {
+    try {
+      return new MemorySheetStore(JSON.parse(readFileSync(this.file, "utf8")) as Partial<Record<SheetName, Grid>>);
+    } catch {
+      return new MemorySheetStore();
+    }
+  }
+
+  private async mutate(fn: (store: MemorySheetStore) => Promise<void>) {
+    const store = this.load();
+    await fn(store);
+    mkdirSync(dirname(this.file), { recursive: true });
+    writeFileSync(this.file, JSON.stringify(store.dump()));
+  }
+
+  readMany<S extends SheetName>(sheets: readonly S[]) {
+    return this.load().readMany(sheets);
+  }
+
+  append(sheet: SheetName, rows: CellValue[][]) {
+    return this.mutate((s) => s.append(sheet, rows));
+  }
+
+  updateRow(sheet: SheetName, row: number, values: CellValue[]) {
+    return this.mutate((s) => s.updateRow(sheet, row, values));
+  }
+
+  updateRows(updates: readonly RowUpdate[]) {
+    return this.mutate((s) => s.updateRows(updates));
+  }
+
+  deleteRow(sheet: SheetName, row: number) {
+    return this.mutate((s) => s.deleteRow(sheet, row));
   }
 }

@@ -13,6 +13,8 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { useLogout, useMe } from "../../hooks/useAuth";
+import { fokus } from "../ui/Button";
 
 type NavItem = { to: string; label: string; icon: LucideIcon };
 
@@ -33,14 +35,10 @@ const sidebarNav: NavItem[] = [
   { to: "/master", label: "Master", icon: Tags },
 ];
 
-// TODO: "Pengguna" hanya untuk admin
-const sidebarBawah: NavItem[] = [
+const sidebarBawah: (NavItem & { adminOnly?: boolean })[] = [
   { to: "/pengaturan", label: "Pengaturan", icon: Settings },
-  { to: "/pengguna", label: "Pengguna", icon: Users },
+  { to: "/pengguna", label: "Pengguna", icon: Users, adminOnly: true },
 ];
-
-const fokus =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2";
 
 function SidebarLink({ to, label, icon: Icon }: NavItem) {
   return (
@@ -60,6 +58,10 @@ function SidebarLink({ to, label, icon: Icon }: NavItem) {
 }
 
 export default function AppLayout() {
+  const { data: me } = useMe();
+  const logout = useLogout();
+  const isAdmin = me?.peran === "admin";
+
   return (
     <div className="min-h-full lg:flex">
       {/* Sidebar laptop (≥ lg) */}
@@ -69,12 +71,15 @@ export default function AppLayout() {
           <SidebarLink key={item.to} {...item} />
         ))}
         <hr className="my-3 border-garis" />
-        {sidebarBawah.map((item) => (
-          <SidebarLink key={item.to} {...item} />
-        ))}
-        {/* TODO: logout */}
+        {sidebarBawah
+          .filter((item) => !item.adminOnly || isAdmin)
+          .map((item) => (
+            <SidebarLink key={item.to} {...item} />
+          ))}
         <button
           type="button"
+          onClick={() => logout.mutate()}
+          disabled={logout.isPending}
           className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-stone-500 hover:bg-brand-50 ${fokus}`}
         >
           <LogOut className="size-5" aria-hidden />
