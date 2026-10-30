@@ -1,28 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ADMIN, setupTest } from "./helpers";
-
-const BUDI = { username: "budi", password: "budi12345", nama: "Budi", peran: "user" };
-
-/** Admin + Budi, 4 akun, kategori Makan & Gaji. Clock: 30 Okt 2026 10.00 WIB. */
-async function siapkan() {
-  const t = setupTest();
-  const admin = t.client();
-  await admin.post("/auth/setup", ADMIN);
-  await admin.post("/pengguna", BUDI);
-  const budi = t.client();
-  await budi.post("/auth/login", { username: "budi", password: BUDI.password });
-
-  const akun: Record<string, string> = {};
-  for (const [nama, jenis] of [["BCA", "bank"], ["Mandiri", "bank"], ["Jago", "bank"], ["GoPay", "ewallet"]]) {
-    akun[nama] = (await admin.post("/akun", { nama, jenis })).body.id;
-  }
-  const makan = (await admin.post("/kategori", { nama: "Makan", tipe: "keluar" })).body.id as string;
-  const gaji = (await admin.post("/kategori", { nama: "Gaji", tipe: "masuk" })).body.id as string;
-  const kategori = (await admin.get("/kategori")).body as { id: string; kodeSistem: string | null }[];
-  const biayaAdmin = kategori.find((k) => k.kodeSistem === "BIAYA_ADMIN")!.id;
-  const tarik = kategori.find((k) => k.kodeSistem === "TARIK_TABUNGAN")!.id;
-  return { ...t, admin, budi, akun, makan, gaji, biayaAdmin, tarik };
-}
+import { siapkan } from "./helpers";
 
 const transfer = (akunId: string, akunTujuanId: string, nominal: number, biayaAdmin = 0) => ({
   tipe: "transfer",

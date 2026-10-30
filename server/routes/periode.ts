@@ -8,7 +8,7 @@ import { jsonBody } from "../common/validation";
 import { findOwned, newId, newRow, rowsOf, updatedRow, type ParsedRow } from "../repositories/rows";
 import { addDays, namaDefault, periodeDto, periodeMilik } from "../services/periode";
 import { hitungRingkasan } from "../services/ringkasan";
-import { periodeAktif } from "../services/saldo";
+import { periodeAktif, saldoPerAkun } from "../services/saldo";
 import { rencanaSetor, rencanaSetorTerdampak, simpanSetor, totalTabungan } from "../services/tabungan";
 import { transaksiMapper, urutTransaksi } from "../services/transaksi";
 import type { CellValue, RowUpdate } from "../sheets/store";
@@ -69,6 +69,19 @@ periode.get("/aktif", async (c) => {
   const aktif = periodeAktif(rowsOf(data, "Periode"), user.data.id);
   if (!aktif) throw new AppError(404, "Belum ada periode aktif.");
   return c.json({ ...periodeDto(aktif.data), saldoAwal: saldoAwalDto(rowsOf(data, "SaldoAwal"), aktif.data.id) });
+});
+
+/** Pratinjau sisa setiap akun yang akan masuk tabungan saat periode aktif ditutup, tanpa menulis (spec §7.4). */
+periode.get("/aktif/pratinjau-tutup", async (c) => {
+  const { user, data } = await loadSession(c, ["Akun", "Periode", "SaldoAwal", "Transaksi"]);
+  const aktif = periodeAktif(rowsOf(data, "Periode"), user.data.id);
+  if (!aktif) throw new AppError(404, "Belum ada periode aktif.");
+  const akun = rowsOf(data, "Akun");
+  const urutan = new Map(akun.map((a) => [a.data.id, a.data]));
+  const sisa = [...saldoPerAkun(aktif.data.id, rowsOf(data, "SaldoAwal"), rowsOf(data, "Transaksi"))]
+    .map(([akunId, nominal]) => ({ akunId, nama: urutan.get(akunId)?.nama ?? "(akun dihapus)", nominal }))
+    .sort((a, b) => (urutan.get(a.akunId)?.urutan ?? 0) - (urutan.get(b.akunId)?.urutan ?? 0));
+  return c.json({ periode: periodeDto(aktif.data), sisa, total: sisa.reduce((n, s) => n + s.nominal, 0) });
 });
 
 /**

@@ -13,6 +13,7 @@ import { MoneyInput } from "../components/ui/MoneyInput";
 import { ErrorState, ListSkeleton } from "../components/ui/States";
 import { useAkun } from "../hooks/useMaster";
 import { usePeriodeAktif, type Periode } from "../hooks/usePeriode";
+import { usePratinjauTutup } from "../hooks/useTabungan";
 import { invalidateKeuangan, type Transaksi } from "../hooks/useTransaksi";
 import { ApiError, api } from "../lib/api";
 import { formatRupiah, formatTanggalPanjang, hariIni, tambahHari } from "../lib/format";
@@ -29,7 +30,10 @@ const namaDefault = (tanggal: string) => {
   return `Periode ${d} ${BULAN[m - 1]} ${y}`;
 };
 
-function Langkah({ aktif, total, label }: { aktif: number; total: number; label: string }) {
+type Langkah = "tutup" | "saldo" | "konfirmasi";
+const LABEL: Record<Langkah, string> = { tutup: "Tutup periode", saldo: "Saldo awal", konfirmasi: "Konfirmasi" };
+
+function IndikatorLangkah({ aktif, total, label }: { aktif: number; total: number; label: string }) {
   return (
     <div className="mb-4 flex flex-col gap-2">
       <div className="flex gap-1.5" aria-hidden>
@@ -44,15 +48,13 @@ function Langkah({ aktif, total, label }: { aktif: number; total: number; label:
   );
 }
 
-/**
- * Mulai periode baru (02 §6.7). Langkah pratinjau tutup periode (sisa → tabungan) menyusul di M5;
- * di sini: isi saldo awal lalu konfirmasi.
- */
+/** Mulai periode baru: wizard tutup periode → saldo awal → konfirmasi (02 §6.7). */
 export default function PeriodeBaruPage() {
   const qc = useQueryClient();
   const aktif = usePeriodeAktif();
   const akun = useAkun();
-  const [langkah, setLangkah] = useState<1 | 2>(1);
+  const [langkah, setLangkah] = useState<Langkah | null>(null);
+  const pratinjau = usePratinjauTutup(Boolean(aktif.data));
   const [tanggal, setTanggal] = useState(hariIni());
   const [nama, setNama] = useState("");
   const [keterangan, setKeterangan] = useState("");
@@ -72,7 +74,7 @@ export default function PeriodeBaruPage() {
     onSuccess: () => invalidateKeuangan(qc),
     // Error per field ada di langkah 1
     onError: (e) => {
-      if (e instanceof ApiError && e.errors) setLangkah(1);
+      if (e instanceof ApiError && e.errors) setLangkah("saldo");
     },
   });
   const err = mulai.error instanceof ApiError ? mulai.error : null;
@@ -107,24 +109,65 @@ export default function PeriodeBaruPage() {
   }
 
   const lama = aktif.data;
+  // Langkah tutup periode hanya ada kalau sudah ada periode aktif
+  const urutan: Langkah[] = lama ? ["tutup", "saldo", "konfirmasi"] : ["saldo", "konfirmasi"];
+  const sekarang = langkah ?? urutan[0];
+  const indikator = <IndikatorLangkah aktif={urutan.indexOf(sekarang) + 1} total={urutan.length} label={LABEL[sekarang]} />;
+  const ke = (l: Langkah) => {
+    setLangkah(l);
+    window.scrollTo(0, 0);
+  };
   const minTanggal = lama ? tambahHari(lama.tanggalMulai, 1) : undefined;
   const bentrok = err?.status === 409 ? ((err.extra.transaksi as Transaksi[] | undefined) ?? []) : [];
 
   return (
     <>
       <PageHeader title="Mulai periode baru" />
-      {langkah === 1 ? (
+      {sekarang === "tutup" ? (
+        <div className="flex flex-col gap-4">
+          {indikator}
+          {pratinjau.isPending ? (
+            <ListSkeleton rows={3} />
+          ) : pratinjau.isError ? (
+            <ErrorState error={pratinjau.error} onRetry={() => pratinjau.refetch()} />
+          ) : (
+            <>
+              <p className="text-sm text-stone-700">
+                Sisa <span className="font-semibold">&ldquo;{pratinjau.data.periode.nama}&rdquo;</span> akan masuk tabungan:
+              </p>
+              <Card className="flex flex-col divide-y divide-garis">
+                {pratinjau.data.sisa.length === 0 && <p className="px-4 py-3 text-sm text-stone-500">Tidak ada saldo di periode ini.</p>}
+                {pratinjau.data.sisa.map((s) => (
+                  <div key={s.akunId} className="flex justify-between gap-3 px-4 py-2.5 text-sm">
+                    <span className="font-medium">{s.nama}</span>
+                    <span className={`font-semibold tabular-nums ${s.nominal < 0 ? "text-keluar" : ""}`}>
+                      {formatRupiah(s.nominal)}
+                      {s.nominal < 0 && <span className="block text-right text-xs font-normal">mengurangi tabungan</span>}
+                    </span>
+                  </div>
+                ))}
+                <div className="flex justify-between px-4 py-3 font-bold">
+                  <span>Total</span>
+                  <span className={`tabular-nums ${pratinjau.data.total < 0 ? "text-keluar" : ""}`}>{formatRupiah(pratinjau.data.total)}</span>
+                </div>
+              </Card>
+              <Button block onClick={() => ke("saldo")}>
+                Lanjut
+              </Button>
+            </>
+          )}
+        </div>
+      ) : sekarang === "saldo" ? (
         <form
           noValidate
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
             mulai.reset();
-            setLangkah(2);
-            window.scrollTo(0, 0);
+            ke("konfirmasi");
           }}
         >
-          <Langkah aktif={1} total={2} label="Saldo awal" />
+          {indikator}
           <Input label="Nama" value={nama} placeholder={namaDefault(tanggal)} maxLength={50} onChange={(e) => setNama(e.target.value)} error={err?.errors?.nama} />
           <Input
             label="Mulai"
@@ -171,7 +214,7 @@ export default function PeriodeBaruPage() {
         </form>
       ) : (
         <div className="flex flex-col gap-4">
-          <Langkah aktif={2} total={2} label="Konfirmasi" />
+          {indikator}
           <Card className="flex flex-col gap-4 p-4">
             {lama && (
               <div>
@@ -179,7 +222,10 @@ export default function PeriodeBaruPage() {
                 <p className="font-bold">
                   {lama.nama} · {formatTanggalPanjang(tambahHari(tanggal, -1))}
                 </p>
-                <p className="text-sm text-stone-500">Sisa saldo setiap akun masuk tabungan.</p>
+                <p className="mt-3 text-sm text-stone-500">Masuk tabungan</p>
+                <p className={`text-xl font-extrabold tabular-nums ${(pratinjau.data?.total ?? 0) < 0 ? "text-keluar" : "text-tabungan"}`}>
+                  {formatRupiah(pratinjau.data?.total ?? 0)}
+                </p>
               </div>
             )}
             <div>
@@ -209,7 +255,7 @@ export default function PeriodeBaruPage() {
           <Button block loading={mulai.isPending} onClick={() => mulai.mutate()}>
             Mulai periode
           </Button>
-          <Button variant="secondary" block onClick={() => setLangkah(1)} disabled={mulai.isPending}>
+          <Button variant="secondary" block onClick={() => ke("saldo")} disabled={mulai.isPending}>
             Kembali
           </Button>
         </div>
